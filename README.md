@@ -57,3 +57,23 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+# ng new shlomo6-keys --package-manager="yarn" -S --standalone --style="scss" --prefix="and" --commit --server-routing --routing
+
+
+# angular.js
+"architect": {
+  "build": {
+    "options": {
+        "stylePreprocessorOptions": {
+		  "sass": {
+			"silenceDeprecations": [
+				"mixed-decls", 
+				"color-functions", 
+				"global-builtin", 
+				"import"
+			 ]
+		  }
+		},
+    }
+  }

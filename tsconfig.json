@@ -23,5 +23,9 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  // "paths": {
+  //   "@node/*": ["src/app/*"],
+  //   "@environments/*": ["src/environments/*"]
+  // }
 }
