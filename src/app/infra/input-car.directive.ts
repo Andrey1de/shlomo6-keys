@@ -1,6 +1,7 @@
+import { NgComponentOutlet } from '@angular/common';
 import { EmitterVisitorContext } from '@angular/compiler';
 import { AfterViewInit, Directive, ElementRef, EventEmitter, HostBinding, HostListener, input, Input, OnInit, Output, Renderer2 } from '@angular/core';
-
+import { NgControl } from '@angular/forms';
 var g_first_car = 66000000;
 
 @Directive({
@@ -10,40 +11,12 @@ var g_first_car = 66000000;
 })
 export class InputCarDirective implements OnInit, AfterViewInit {
  
-  
-  
-  
-  @Input()
-  public set carNum(value: string) {
-     
-    if( this._carNum != value){
-      const newVal = toCarNum(value)
-     
-      this._carNum  = newVal;
-      this.native.value = this._carNum;
-     // this.renderer2.setProperty(this.native, 'value',this._carNum  , '');
-      //this.carNumChange.emit(this._carNum );
-        
-    }
-     
-  }
-
-  private _carNum: string = '';
-  public get carNum(): string {
-    return this._carNum;
-  }
-  
-  @Output() carNumChange =  new EventEmitter<string>();
-
-
-  
-  //@Input('input-car') row !:any;
-
   private native!:HTMLInputElement;
   //private oldCarNum:string = '';
 
   constructor(private el: ElementRef<HTMLInputElement> , 
-      private r2: Renderer2) {
+      private r2: Renderer2,
+      private ngControl: NgControl) {
      this.native = this.el.nativeElement;
   }
   ngOnInit(): void {
@@ -51,8 +24,60 @@ export class InputCarDirective implements OnInit, AfterViewInit {
  }
 
   ngAfterViewInit(): void {
+   // this._oldCarNum = this._carNum;
     //throw new Error('Method not implemented.');
   }
+
+  //ngControl!: inject(NgControl)
+  
+  //#region Inputs,Outputs
+  
+  private _carNum:string='';
+  @Input()
+  public set carNum(value: string) {
+    let newVal = value;
+    if( this._carNum != value ){
+      newVal = this.toCarNum(value);
+      if(this._carNum  != newVal){
+        this._carNum  = newVal;
+       // this.native.value = this._carNum;
+        this.setProperty( 'value',this._carNum  );
+       
+   
+      }
+           
+    }
+     
+  }
+  @Output() carNumChange =  new EventEmitter<string>();
+
+  private setProperty( name: string, value: any){
+
+    this.r2.setProperty(this.native, name,value);
+  }
+
+  private addClass( name: string){
+
+    this.r2.addClass(this.native, name);
+  }
+  private removeClass( name: string){
+
+    this.r2.removeClass(this.native, name);
+  }
+  private getAttribute( name: string){
+
+    this.na(this.native, name);
+  }
+  private setAttribute( name: string,value:any){
+
+    this.r2.setAttribute(this.native, name,value);
+  }
+  private removeAttribute( name: string){
+
+    this.r2.removeAttribute(this.native, name);
+  }
+
+
 
   clear(){
     debugger;
@@ -61,12 +86,15 @@ export class InputCarDirective implements OnInit, AfterViewInit {
   @HostListener('input') onChange() {
     this.carNum =  this.native.value;
   }
- 
- 
+
+  private _oldCarNum  :string = '';
   get oldCarNum():string {
-    return this.native.getAttribute("ng-reflect-car-num")??'';
+    return this._oldCarNum;//this.native.getAttribute("ng-reflect-car-num")??'';
   }
+  get IsReady() { return this._carNum.length === 9 
+                  || this._carNum.length === 10;} 
   @HostListener('focus') onFocus() {
+   // this.native.readOnly
 
     //this.oldCarNum =  this._carNum;
    // this._selected =  true;
@@ -77,8 +105,14 @@ export class InputCarDirective implements OnInit, AfterViewInit {
     //this._selected =  false;
     this.native.setAttribute("data-select","false");// ='yellow;'
     if(this.oldCarNum != this._carNum ){
+      const isReady = this.IsReady;
       //this.oldCarNum = this._carNum;
+     // this.oldCarNum = this._carNum ;
       this.carNumChange.emit(this._carNum);
+     
+      if(this.IsReady !== !!this.native.getAttribute('data-ready'))
+      this.setAttribute('data-ready',true);
+     
     }
     //this.el.nativeElement.style.color = "red";
     // element.style.backgroundColor = "red"
@@ -118,11 +152,11 @@ export class InputCarDirective implements OnInit, AfterViewInit {
       case 'ArrowLeft':
       case 'ArrowRight':
         console.log(`++code:${ev.code} | key:${ev.key}`);
-          return;
+        break;
       case 'Backspace':
       
           console.log(`++code:${ev.code} | key:${ev.key}`);
-          return;
+          break;
       
       }
       ev.preventDefault();
@@ -131,7 +165,9 @@ export class InputCarDirective implements OnInit, AfterViewInit {
       return 0;
     
   }
-  onPlus(){}
+  onPlus(){
+    //TBD
+  }
   onMinus(){
     this.clear();
   }
@@ -145,6 +181,29 @@ export class InputCarDirective implements OnInit, AfterViewInit {
     this.carNum = this.oldCarNum;
   }
   //#endregion
+  private toCarNum(num:string):string{
+    let ret = num.replace(/\D/g,'');;
+    if(ret.length <= 6){
+      return ret;
+    } 
+    const arr = [...ret];
+  
+    if(arr.length == 7){
+     
+       ret = arr[0] + arr[1] + '-' 
+                + arr[2] + arr[3] +arr[4] 
+                + '-' + arr[5] + arr[6];
+      
+    }
+    else if(arr.length == 7){
+       ret = arr[0] + arr[1] + arr[2] + '-'
+      + arr[3] + arr[4] + '-' 
+      + arr[5] + arr[6] + + arr[7];
+    
+  
+    }
+    return ret;
+  }
 }//EOC=================
 
 
@@ -166,29 +225,6 @@ function SerialCarNum(): string{
 
 }
 
-export function toCarNum(num:string):string{
-  let ret = num.replace(/\D/g,'');;
-  if(ret.length <= 6){
-    return ret;
-  } 
-  const arr = [...ret];
-
-  if(arr.length == 7){
-   
-     ret = arr[0] + arr[1] + '-' 
-              + arr[2] + arr[3] +arr[4] 
-              + '-' + arr[5] + arr[6];
-    
-  }
-  else {
-     ret = arr[0] + arr[1] + arr[2] + '-'
-    + arr[3] + arr[4] + '-' 
-    + arr[5] + arr[6] + + arr[7];
-  
-
-  }
-  return ret;
-}
 function hex(s:string  ):string{
   s = ''+s;
   if(s.length >= 1){
