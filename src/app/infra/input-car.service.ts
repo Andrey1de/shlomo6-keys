@@ -12,7 +12,7 @@ export class InputCarDirective implements OnInit, AfterViewInit {
  
   
   
-  renderer2: any;
+  
   @Input()
   public set carNum(value: string) {
      
@@ -51,7 +51,7 @@ export class InputCarDirective implements OnInit, AfterViewInit {
  }
 
   ngAfterViewInit(): void {
-    throw new Error('Method not implemented.');
+    //throw new Error('Method not implemented.');
   }
 
   clear(){
